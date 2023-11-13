@@ -8,7 +8,7 @@ def init_db():
     conn = sqlite3.connect('database/alerts.db')
     conn.execute('''
         CREATE TABLE IF NOT EXISTS alerts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY,
             message TEXT NOT NULL,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
@@ -20,11 +20,14 @@ init_db()
 
 
 
-# Route for creating a new alert
+# Route for creating a new alert or updating an existing alert
 @app.route('/alerts', methods=['POST'])
-def create_alert():
+def create_or_update_alert():
     data = request.get_json()
     message = data.get('message')
+    alert_id = data.get('id')  # Client-specified ID
+
+    print('alert id',alert_id)
 
     if not message:
         return jsonify({'error': 'Message is required'}), 400
@@ -32,6 +35,27 @@ def create_alert():
     conn = sqlite3.connect('database/alerts.db')
     cursor = conn.cursor()
 
+    if alert_id is not None:
+        print('I have the alert id')
+        # Check if the specified ID already exists
+        cursor.execute('SELECT * FROM alerts WHERE id = ?', (alert_id,))
+        existing_alert = cursor.fetchone()
+
+        if existing_alert:
+            # If the ID exists, update the existing alert
+            cursor.execute('UPDATE alerts SET message = ? WHERE id = ?', (message, alert_id))
+            conn.commit()
+            conn.close()
+            return jsonify({'message': f'Alert with ID {alert_id} updated successfully'}), 200
+        else:
+            # If the ID does not exist, create a new alert
+            cursor.execute('INSERT INTO alerts (message, id) VALUES (?,?)', (message,alert_id))
+            conn.commit()
+            conn.close()
+            return jsonify({'message': f'Alert with ID {alert_id} created successfully'}), 200
+
+
+    # If the ID is not specified create a new alert without a id
     cursor.execute('INSERT INTO alerts (message) VALUES (?)', (message,))
     conn.commit()
     conn.close()
