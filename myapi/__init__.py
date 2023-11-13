@@ -1,3 +1,1 @@
-//init
-
-//test
+#test

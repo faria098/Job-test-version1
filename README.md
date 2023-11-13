@@ -1,4 +1,4 @@
-# Job-test-version1
+
 # Alert API
 
 This is a simple REST API built using Flask for managing alerts. It allows users to create alerts with custom IDs and retrieve alerts by ID. This README provides an overview of the project, its structure, and how to use it.
@@ -182,4 +182,5 @@ To retrieve all alerts, make a GET request to `/alerts`. The response will conta
 ## Contributing
 
 Contributions are welcome! Please read the CONTRIBUTING.md file for details on how to contribute to this project.
+
 
